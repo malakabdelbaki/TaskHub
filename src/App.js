@@ -1,5 +1,7 @@
 // App.js
 
+import React from "react";
+
 import { useAuth } from "react-oidc-context";
 
 function App() {
