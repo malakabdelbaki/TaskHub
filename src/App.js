@@ -1,6 +1,9 @@
 import React, { useEffect } from "react";
 import { useAuth } from "react-oidc-context";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
+import HomePage from "./pages/HomePage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   const auth = useAuth();
@@ -21,7 +24,12 @@ function App() {
 
 
   if (auth.isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="fullscreen-loader">
+        <div className="spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   if (auth.error) {
@@ -29,26 +37,22 @@ function App() {
   }
 
   if (auth.isAuthenticated) {
+    const name = auth.user?.profile.name || auth.user?.profile.email;
+    const email = auth.user?.profile.email;
+
     return (
-      <div style={{ padding: "2rem" }}>
-        <h1>Welcome {auth.user?.profile.email}</h1>
-
-        {process.env.NODE_ENV === "development" && (
-          <div style={{ marginTop: "1rem", background: "#f4f4f4", padding: "1rem", fontSize: "0.9rem" }}>
-            <pre>ID Token: {auth.user?.id_token}</pre>
-            <pre>Access Token: {auth.user?.access_token}</pre>
-            <pre>Refresh Token: {auth.user?.refresh_token}</pre>
-          </div>
-        )}
-
-        <button onClick={() => auth.removeUser()}>Sign out</button>
-      </div>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage username={name} />} />
+          <Route path="/profile" element={<ProfilePage name={name} email={email} />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
     );
   }
 
-
   return (
-    <div className="redirecting-screen">
+    <div className="fullscreen-loader">
       <div className="spinner"></div>
       <p>Redirecting to login...</p>
     </div>

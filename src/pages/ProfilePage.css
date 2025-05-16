@@ -1,0 +1,16 @@
+.profile-page {
+  font-family: 'Poppins', sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #E5EDFF;
+  padding: 1rem 2rem;
+}
+
+.profile-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+}
