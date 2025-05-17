@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./ProfilePage.css";
-import TaskHubLogo from "../TaskHubLogo.svg";
-import ProfileIcon from "../ProfileIcon.svg";
-import ProfileIconUser from "../ProfileIconUser.svg";
-import EmailIcon from "../EmailIcon.svg";
+import TaskHubLogo from "../icons/TaskHubLogo.svg";
+import ProfileIcon from "../icons/ProfileIcon.svg";
+import ProfileIconUser from "../icons/ProfileIconUser.svg";
+import EmailIcon from "../icons/EmailIcon.svg";
 
 function ProfilePage({ name, email }) {
   const navigate = useNavigate();

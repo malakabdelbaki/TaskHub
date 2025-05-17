@@ -50,3 +50,302 @@ body, html {
   font-size: 2rem;
   font-weight: bold;
 }
+
+.welcome-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+}
+
+.new-task-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 13px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1.1rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  color: #2D2D2D;
+  cursor: pointer;
+}
+
+.new-task-btn:hover {
+  background-color: #f4f4f4;
+}
+
+.add-icon {
+  height: 22px;
+  width: 22px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 2rem 3rem;
+  border-radius: 16px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.close-btn {
+  margin-top: 1rem;
+  background-color: #407BFF;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+}
+
+.close-btn:hover {
+  background-color: #305edb;
+}
+
+.modal-box {
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 20px;
+  width: 95%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.modal-header h2 {
+  color: #407BFF;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.close-icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.input-label {
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  margin-top: 1rem;
+}
+
+.optional {
+  font-weight: 400;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.text-input {
+  padding: 0.8rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.file-upload {
+  margin-top: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.file-input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.file-note {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+  margin-top: 0.3rem;
+}
+
+.add-task-btn {
+  margin-top: 1.5rem;
+  padding: 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: #407BFF;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+
+.add-task-btn:hover {
+  background-color: #305edb;
+}
+
+
+
+
+.task-table {
+  margin-top: 2rem;
+  width: 90%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+.table-header span,
+.table-row span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
+
+.table-row {
+  background-color: white;
+  margin-top: 0.75rem;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px #eaeaea;
+}
+
+.table-row select {
+  justify-self: end;
+}
+
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.8fr 1.2fr; 
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+}
+
+
+
+
+
+.table-header {
+  font-weight: 600;
+  font-size: 1rem;
+  background-color: #f9f9f9;
+}
+
+
+
+.icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.attachment-cell {
+  display: flex;
+  align-items: center;
+}
+
+.status-dropdown {
+  justify-self: start;
+  width: fit-content;
+  padding: 0.4rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg fill='black' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 14px;
+  padding-right: 2rem;
+  cursor: pointer;
+  outline: none;
+  border: none;
+}
+
+.status-todo {
+  background-color: #E0E7FF;
+  color: #1E3A8A;
+  border: 2px solid #1E3A8A;
+}
+
+.status-in-progress {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border: 2px solid #92400E;
+}
+
+.status-done {
+  background-color: #B4DFD2;
+  color: #093312;
+  border: 2px solid #093312;
+}
+
+.status-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.delete-btn {
+  margin-left: 4rem; 
+  margin-right: 0.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn img {
+  width: 24px;
+  height: 24px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.delete-btn:hover img {
+  opacity: 1;
+}
+
+
