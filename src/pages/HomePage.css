@@ -34,3 +34,12 @@ body, html {
   font-family: 'Poppins', sans-serif;
   text-decoration: none;
 }
+.profile-icon {
+  cursor: pointer;
+}
+
+.profile-icon-img {
+  height: 32px;
+  width: 32px;
+  object-fit: contain;
+}

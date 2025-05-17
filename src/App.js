@@ -4,23 +4,18 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import "./App.css";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
+import RedirectToLogin from "./pages/RedirectToLogin";
 
 function App() {
   const auth = useAuth();
 
-  const signOutRedirect = () => {
-    const clientId = "7kp7g3giro4pav3qo9keq36l2l";
-    const logoutUri = "<logout uri>";
-    const cognitoDomain = "https://eu-north-1eh2sejlbm.auth.eu-north-1.amazoncognito.com";
-
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
-  };
-
   useEffect(() => {
-    if (!auth.isLoading && !auth.isAuthenticated && !auth.error) {
-      auth.signinRedirect();
+    const query = new URLSearchParams(window.location.search);
+    if (query.get("post_logout") === "true") {
+      localStorage.clear();
+      window.location.replace("/");
     }
-  }, [auth.isLoading, auth.isAuthenticated, auth.error]);
+  }, []);
 
 
   if (auth.isLoading) {
@@ -51,12 +46,10 @@ function App() {
     );
   }
 
-  return (
-    <div className="fullscreen-loader">
-      <div className="spinner"></div>
-      <p>Redirecting to login...</p>
-    </div>
-  );
+  if (!auth.isAuthenticated) {
+  return <RedirectToLogin />;
+}
+
 }
 
 export default App;
