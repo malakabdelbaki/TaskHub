@@ -19,11 +19,9 @@ function HomePage({ username }) {
 
       </header>
 
-      <main className="main-content">
-        <h1>
+        <h1 className="welcome-text">
           Welcome, <span className="username">{username}</span>
         </h1>
-      </main>
     </div>
   );
 }
