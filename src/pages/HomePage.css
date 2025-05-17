@@ -317,4 +317,35 @@ body, html {
   border: 2px solid #093312;
 }
 
+.status-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.delete-btn {
+  margin-left: 4rem; 
+  margin-right: 0.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn img {
+  width: 24px;
+  height: 24px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.delete-btn:hover img {
+  opacity: 1;
+}
+
 

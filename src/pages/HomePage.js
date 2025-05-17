@@ -9,6 +9,8 @@ import StatusIcon from "../icons/StatusIcon.svg";
 import dummyTasks from "./dummyTasks";
 import AddIcon from "../icons/AddIcon.svg";
 import CancelIcon from "../icons/CancelIcon.svg";
+import DeleteIcon from "../icons/DeleteIcon.svg";
+
 
 
 function HomePage({ username }) {
@@ -116,6 +118,9 @@ function HomePage({ username }) {
                 <option value="in-progress">In progress</option>
                 <option value="done">Done</option>
               </select>
+              <button className="delete-btn" onClick={() => { /* placeholder */ }}>
+                <img src={DeleteIcon} alt="Delete" />
+              </button>
             </span>
           </div>
         ))}
