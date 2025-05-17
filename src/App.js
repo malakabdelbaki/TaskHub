@@ -1,19 +1,30 @@
-// App.js
-
+import React, { useEffect } from "react";
 import { useAuth } from "react-oidc-context";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import "./App.css";
+import HomePage from "./pages/HomePage";
+import ProfilePage from "./pages/ProfilePage";
+import RedirectToLogin from "./pages/RedirectToLogin";
 
 function App() {
   const auth = useAuth();
 
-  const signOutRedirect = () => {
-    const clientId = "7kp7g3giro4pav3qo9keq36l2l";
-    const logoutUri = "<logout uri>";
-    const cognitoDomain = "https://eu-north-1eh2sejlbm.auth.eu-north-1.amazoncognito.com";
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
-  };
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    if (query.get("post_logout") === "true") {
+      localStorage.clear();
+      window.location.replace("/");
+    }
+  }, []);
+
 
   if (auth.isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="fullscreen-loader">
+        <div className="spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   if (auth.error) {
@@ -21,24 +32,24 @@ function App() {
   }
 
   if (auth.isAuthenticated) {
-    return (
-      <div>
-        <pre> Hello: {auth.user?.profile.email} </pre>
-        <pre> ID Token: {auth.user?.id_token} </pre>
-        <pre> Access Token: {auth.user?.access_token} </pre>
-        <pre> Refresh Token: {auth.user?.refresh_token} </pre>
+    const name = auth.user?.profile.name || auth.user?.profile.email;
+    const email = auth.user?.profile.email;
 
-        <button onClick={() => auth.removeUser()}>Sign out</button>
-      </div>
+    return (
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage username={name} />} />
+          <Route path="/profile" element={<ProfilePage name={name} email={email} />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
     );
   }
 
-  return (
-    <div>
-      <button onClick={() => auth.signinRedirect()}>Sign in</button>
-      <button onClick={() => signOutRedirect()}>Sign out</button>
-    </div>
-  );
+  if (!auth.isAuthenticated) {
+  return <RedirectToLogin />;
+}
+
 }
 
 export default App;

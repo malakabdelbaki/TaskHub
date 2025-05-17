@@ -1,0 +1,52 @@
+body, html {
+  margin: 0;
+  padding: 0;
+}
+
+.homepage {
+  font-family: 'Poppins', sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #E5EDFF;
+  padding: 1rem 2rem;
+}
+
+.profile-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+
+.logo {
+  height: 50px;
+}
+
+.main-content {
+  padding: 2rem;
+}
+
+.username {
+  color: #407BFF;
+  font-family: 'Poppins', sans-serif;
+  text-decoration: none;
+}
+.profile-icon {
+  cursor: pointer;
+}
+
+.profile-icon-img {
+  height: 32px;
+  width: 32px;
+  object-fit: contain;
+}
+
+.welcome-text {
+  text-align: left;
+  padding-left: 40px;
+  font-size: 2rem;
+  font-weight: bold;
+}
