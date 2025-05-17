@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
-import TaskHubLogo from "../TaskHubLogo.svg";
-import ProfileIcon from "../ProfileIcon.svg";
-import AttachmentIcon from "../AttachmentIcon.svg";
-import NoFileIcon from "../NoFileIcon.svg";
-import StatusIcon from "../StatusIcon.svg";
+import TaskHubLogo from "../icons/TaskHubLogo.svg";
+import ProfileIcon from "../icons/ProfileIcon.svg";
+import AttachmentIcon from "../icons/AttachmentIcon.svg";
+import NoFileIcon from "../icons/NoFileIcon.svg";
+import StatusIcon from "../icons/StatusIcon.svg";
 import dummyTasks from "./dummyTasks";
-import AddIcon from "../AddIcon.svg";
-import CancelIcon from "../CancelIcon.svg";
+import AddIcon from "../icons/AddIcon.svg";
+import CancelIcon from "../icons/CancelIcon.svg";
 
 
 function HomePage({ username }) {

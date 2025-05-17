@@ -1,6 +1,3 @@
-import AttachmentIcon from "../AttachmentIcon.svg";
-import NoFileIcon from "../NoFileIcon.svg";
-
 const dummyTasks = [
   {
     id: 1,
