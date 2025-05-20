@@ -24,49 +24,44 @@ function HomePage({ username }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchTasks = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
 
-      const token = auth.user?.id_token;
-      if (!token) {
-        throw new Error('No ID token available');
-      }
+const fetchTasks = async () => {
+  try {
+    setIsLoading(true);
+    setError(null);
 
-      // Parse and validate token
-      const response = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/listTasksFn', {
-        method: 'GET',
+    const token = auth.user?.id_token;
+    if (!token) throw new Error('No ID token available');
+    
+    const userId = auth.user.profile?.sub ?? auth.user.sub;
+    if (!userId) throw new Error('No user ID available');
+
+    const response = await fetch(
+      `https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/listTasksFn?user_id=${userId}`,
+      {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        console.log("response "+response);
-        throw new Error(`Failed to fetch tasks: ${response.status} ${response.statusText}`);
+        }
       }
+    );
 
-      const data = await response.json();
-      // Ensure data is an array
-      if (!data || !data.tasks) {
-        console.log("empty : "+data)
-        setTasks([]);
-        return;
-      }
-
-      setTasks(data.tasks);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-      setError(error.message);
-      setTasks([]); // Set empty array on error
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to fetch tasks');
     }
-  };
+
+    const { tasks } = await response.json();
+    setTasks(tasks || []);
+    console.log("TASKS: ", tasks);
+
+  } catch (error) {
+    console.error('Fetch error:', error);
+    setError(error.message);
+    setTasks([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   useEffect(() => {
     if (auth.isAuthenticated && auth.user?.id_token) {
@@ -244,14 +239,27 @@ function HomePage({ username }) {
             <div className="table-row" key={task.id}>
               <span>{task.title}</span>
 
-              <span className="attachment-cell">
-                <img
-                  src={task.fileType === "no-file" ? NoFileIcon : AttachmentIcon}
-                  className="icon"
-                  alt="file"
-                />
-                {task.file || "No file attached"}
-              </span>
+             <span className="attachment-cell">
+  {task.attachment_s3_keys ? (
+    JSON.parse(task.attachment_s3_keys).map((key) => (
+      <a
+        key={key}
+        href={`https://task-management-bucket5228.s3.eu-north-1.amazonaws.com/${key}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={AttachmentIcon} className="icon" alt="file" />
+        {key.split('/').pop()}
+      </a>
+    ))
+  ) : (
+    <>
+      <img src={NoFileIcon} className="icon" alt="no file" />
+      No file attached
+    </>
+  )}
+</span>
+
 
               <span>
                 <select
