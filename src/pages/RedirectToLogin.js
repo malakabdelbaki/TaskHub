@@ -5,10 +5,10 @@ function RedirectToLogin() {
     const auth = useAuth();
 
     useEffect(() => {
-        if (!auth.isLoading && !auth.isAuthenticated && !auth.error) {
+        if (!auth.isLoading && !auth.isAuthenticated) {
             auth.signinRedirect();
         }
-    }, [auth]);
+    }, [auth.isLoading, auth.isAuthenticated]);
 
     return (
         <div className="fullscreen-loader">
