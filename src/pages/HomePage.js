@@ -80,111 +80,7 @@ function HomePage({ username }) {
     }
   }, [auth.isAuthenticated, auth.user?.id_token]);
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     if (!auth.user?.id_token) {
-  //       throw new Error('No ID token available');
-  //     }
-
-  //     // Debug logging
-  //     console.log('Auth object:', auth);
-  //     console.log('Auth user:', auth.user);
-  //     console.log('Auth user sub:', auth.user?.sub);
-  //     console.log('Auth user claims:', auth.user?.profile);
-
-  //     const taskData = {
-  //       user_id: auth.user?.profile?.sub || auth.user?.sub,
-  //       title: taskTitle,
-  //       status: 'ToDo',
-  //       attachment_s3_keys: selectedFile ? [selectedFile.name] : []
-  //     };
-
-  //     console.log('Task data being sent:', taskData);
-
-  //     const response = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/createTaskFn', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Authorization': `Bearer ${auth.user.id_token}`,
-  //         'Content-Type': 'application/json'
-  //       },
-  //       body: JSON.stringify(taskData)
-  //     });
-  //     console.log(response)
-  //     // Debug response
-  //     if (!response.ok) {
-  //       const errorText = await response.text();
-  //       console.error('Error response:', errorText);
-  //       console.log("response "+response);
-  //       throw new Error(`Failed to create task: ${response.status} ${response.statusText}`);
-  //     }
-
-  //     const newTask = await response.json();
-  //     setTasks([...tasks, newTask]);
-  //     setTaskTitle("");
-  //     setSelectedFile(null);
-  //     setShowModal(false);
-  //   } catch (error) {
-  //     console.error('Error creating task:', error);
-  //     setError(error.message);
-  //   }
-  // };
-  // HomePage.js (or wherever your form lives)
-  // const handleSubmit = async () => {
-  //   try {
-  //     const token = auth.user?.id_token;
-  //     if (!token) throw new Error('Not logged in');
-  //     const uid = auth.user.profile?.sub ?? auth.user.sub;
-  //     if (!uid) throw new Error('User ID missing');
-  //     if (!taskTitle.trim()) throw new Error('Title required');
-  
-  //     // 1️⃣ Upload file to uploadFileFn (if any)
-  //     let attachment_key = null;
-  //     if (selectedFile) {
-  //       const form = new FormData();
-  //       form.append('file', selectedFile);
-  //       const up = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/uploadFileFn', {
-  //         method: 'POST',
-  //         headers: { Authorization: `Bearer ${token}` },
-  //         body: form
-  //       });
-  //       if (!up.ok) throw new Error('Upload failed');
-  //       ({ attachment_key } = await up.json());
-  //     }
-  
-  //     // 2️⃣ Create the task with only JSON
-  //     const taskRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/createTaskFn', {
-  //       method: 'POST',
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         'Content-Type': 'application/json'
-  //       },
-  //       body: JSON.stringify({
-  //         user_id: uid,
-  //         title: taskTitle,
-  //         status: 'ToDo',
-  //         attachment_key
-  //       })
-  //     });
-  //     console.log("task resp "+ taskRes.headers);
-  //     if (!taskRes.ok) {
-  //       const text = await taskRes.text();
-  //       throw new Error(`Create failed: ${taskRes.status} ${text}`);
-  //     }
-  //     const { task_id } = await taskRes.json();
-  
-  //     setTasks(prev => [
-  //       ...prev,
-  //       { task_id, user_id: uid, title: taskTitle, status: 'ToDo', attachment_key }
-  //     ]);
-  //     setTaskTitle('');
-  //     setSelectedFile(null);
-  //     setShowModal(false);
-  
-  //   } catch (e) {
-  //     console.error(e);
-  //     setError(e.message);
-  //   }
-  // };
+ 
   const handleSubmit = async () => {
     try {
       const token = auth.user?.id_token;
@@ -193,37 +89,61 @@ function HomePage({ username }) {
       if (!uid) throw new Error('User ID missing');
       if (!taskTitle.trim()) throw new Error('Title required');
   
-      // 🔄 Unified multipart/form-data request
-      const form = new FormData();
-      form.append('user_id', uid);
-      form.append('title', taskTitle);
-      form.append('status', 'ToDo');
-  
+      // 1️⃣ Upload file to uploadFileFn (if any)
+      let attachment_key = null;
       if (selectedFile) {
-        form.append('file', selectedFile);
+        const fileContent = await selectedFile.arrayBuffer();
+        const base64Data = btoa(
+          new Uint8Array(fileContent)
+            .reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+  
+        const uploadRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/uploadFileFn', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            filename: selectedFile.name,
+            content_type: selectedFile.type,
+            file_data: base64Data
+          })
+        });
+  
+        if (!uploadRes.ok) {
+          const text = await uploadRes.text();
+          throw new Error(`Upload failed: ${text}`);
+        }
+  
+        ({ attachment_key } = await uploadRes.json());
       }
   
-      const res = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/createTaskFn', {
+      // 2️⃣ Create the task with only JSON
+      const taskRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/createTaskFn', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json'
         },
-        body: form
+        body: JSON.stringify({
+          user_id: uid,
+          title: taskTitle,
+          status: 'ToDo',
+          attachment_key
+        })
       });
-  console.log("res "+res.headers+ " "+res.status+ " "+res.body)
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Create failed: ${res.status} ${text}`);
+      console.log("task resp "+ taskRes.headers);
+      if (!taskRes.ok) {
+        const text = await taskRes.text();
+        throw new Error(`Create failed: ${taskRes.status} ${text}`);
       }
-  
-      const { task_id } = await res.json();
+      const { task_id } = await taskRes.json();
   
       setTasks(prev => [
         ...prev,
-        { task_id, user_id: uid, title: taskTitle, status: 'ToDo', attachment_key: selectedFile ? 'uploaded' : null }
+        { task_id, user_id: uid, title: taskTitle, status: 'ToDo', attachment_key }
       ]);
-  
       setTaskTitle('');
       setSelectedFile(null);
       setShowModal(false);
