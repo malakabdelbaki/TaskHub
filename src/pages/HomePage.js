@@ -117,6 +117,8 @@ function HomePage({ username }) {
         }
   
         ({ attachment_key } = await uploadRes.json());
+        console.log("attachment_key "+attachment_key)
+        console.log("uploadRes "+uploadRes)
       }
   
       // 2️⃣ Create the task with only JSON
@@ -130,8 +132,9 @@ function HomePage({ username }) {
           user_id: uid,
           title: taskTitle,
           status: 'ToDo',
-          attachment_key
+          attachment_keys: attachment_key ? [attachment_key] : []
         })
+        
       });
       console.log("task resp "+ taskRes.headers);
       if (!taskRes.ok) {
@@ -153,6 +156,68 @@ function HomePage({ username }) {
       setError(e.message);
     }
   };
+  
+   async function uploadAndUpdateTask({ token, userId, taskId, title, status, file }) {
+    const attachment_s3_keys = [];
+  
+    // Step 1: Upload new file (if any)
+    if (file) {
+      const fileContent = await file.arrayBuffer();
+      const base64Data = btoa(
+        new Uint8Array(fileContent).reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+  
+      const uploadRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/uploadFileFn', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          filename: file.name,
+          content_type: file.type,
+          file_data: base64Data
+        })
+      });
+  
+      if (!uploadRes.ok) {
+        const text = await uploadRes.text();
+        throw new Error(`Upload failed: ${text}`);
+      }
+  
+      const { attachment_key } = await uploadRes.json();
+      if (attachment_key) {
+        attachment_s3_keys.push(attachment_key);
+      }
+      console.log("attachment_s3_keys "+attachment_s3_keys)
+      const x = await uploadRes.json()
+      console.log("uploadres "+x)
+    }
+   
+  
+    // Step 2: Send update to Lambda (DynamoDB metadata update)
+    const updateRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/updateTaskFn', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        task_id: taskId,
+        ...(title && { title }),
+        ...(status && { status }),
+        attachment_s3_keys
+      })
+    });
+  
+    if (!updateRes.ok) {
+      const text = await updateRes.text();
+      throw new Error(`Update failed: ${text}`);
+    }
+  
+    return await updateRes.json();
+  }
   
 
   return (
@@ -254,25 +319,44 @@ function HomePage({ username }) {
               </span>
 
               <span>
-                <select
-                  value={task.status}
-                  onChange={(e) => {
-                    const newStatus = e.target.value;
-                    const updatedTasks = [...tasks];
-                    updatedTasks[index].status = newStatus;
-                    setTasks(updatedTasks);
-                  }}
-                  className={`status-dropdown ${task.status === "done"
-                    ? "status-done"
-                    : task.status === "in-progress"
-                      ? "status-in-progress"
-                      : "status-todo"
-                    }`}
-                >
-                  <option value="todo">To Do</option>
-                  <option value="in-progress">In progress</option>
-                  <option value="done">Done</option>
-                </select>
+              <select
+  value={task.status}
+  onChange={async (e) => {
+    const newStatus = e.target.value;
+    const updatedTasks = [...tasks];
+    updatedTasks[index].status = newStatus;
+    setTasks(updatedTasks);
+
+    try {
+      const token = auth.user?.id_token;
+      const userId = auth.user?.profile?.sub ?? auth.user.sub;
+
+      await uploadAndUpdateTask({
+        token,
+        userId,
+        taskId: task.task_id,
+        status: newStatus,
+        title: task.title // Optional, but keeps it consistent
+      });
+    } catch (err) {
+      console.error("Failed to update task:", err);
+      setError(err.message);
+    }
+  }}
+  className={`status-dropdown ${
+    task.status === "done"
+      ? "status-done"
+      : task.status === "in-progress"
+        ? "status-in-progress"
+        : "status-todo"
+  }`}
+>
+  
+
+              <option value="todo">To Do</option>
+              <option value="in-progress">In progress</option>
+              <option value="done">Done</option>
+            </select>
                 <button className="delete-btn" onClick={() => { /* placeholder */ }}>
                   <img src={DeleteIcon} alt="Delete" />
                 </button>
