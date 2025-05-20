@@ -185,8 +185,8 @@ const fetchTasks = async () => {
         attachment_s3_keys.push(attachment_key);
       }
       console.log("attachment_s3_keys "+attachment_s3_keys)
-      const x = await uploadRes.json()
-      console.log("uploadres "+x)
+      //const x = await uploadRes.json()
+    //  console.log("uploadres "+x)
     }
    
   
