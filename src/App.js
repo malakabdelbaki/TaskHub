@@ -5,6 +5,7 @@ import "./App.css";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import RedirectToLogin from "./pages/RedirectToLogin";
+import IntegratedGroups from "./components/IntegratedGroups";
 
 function App() {
   const auth = useAuth();
@@ -38,7 +39,7 @@ function App() {
     return (
       <Router>
         <Routes>
-          <Route path="/" element={<HomePage username={name} />} />
+          <Route path="/" element={<IntegratedGroups username={name} />} />
           <Route path="/profile" element={<ProfilePage name={name} email={email} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
