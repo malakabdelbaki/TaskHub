@@ -11,6 +11,7 @@ import dummyTasks from "./dummyTasks";
 import AddIcon from "../icons/AddIcon.svg";
 import CancelIcon from "../icons/CancelIcon.svg";
 import DeleteIcon from "../icons/DeleteIcon.svg";
+import EditIcon from "../icons/editIcon.png";
 
 function HomePage({ username }) {
   const navigate = useNavigate();
@@ -21,6 +22,11 @@ function HomePage({ username }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [editedDescription, setEditedDescription] = useState("");
+  const [newAttachment, setNewAttachment] = useState(null);
 
   const fetchTasks = async () => {
     try {
@@ -49,7 +55,9 @@ function HomePage({ username }) {
 
       const { tasks } = await response.json();
       setTasks(tasks || []);
-      console.log("TASKS: ", tasks);
+      for (const task of tasks) {
+        console.log("task "+task);
+      }
 
     } catch (error) {
       console.error('Fetch error:', error);
@@ -62,10 +70,6 @@ function HomePage({ username }) {
 
   useEffect(() => {
     if (auth.isAuthenticated && auth.user?.id_token) {
-      console.log('Auth User Details:', {
-        ...auth.user,
-        id_token: 'REDACTED' // Not logging the actual token for security
-      });
       fetchTasks();
     } else {
       console.log('Not authenticated or no token available');
@@ -135,8 +139,7 @@ function HomePage({ username }) {
 
       // 3️⃣ Update the task with the attachment_key and task_id
       if (attachment_key) {
-        console.log("attachment_key******************* "+attachment_key);
-        const updateRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/updateTaskFn', {
+        const updateRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/updateTask', {
           method: 'PUT',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -148,9 +151,6 @@ function HomePage({ username }) {
             attachment_s3_keys: [attachment_key]
           })
         });
-        console.log("updateRes "+updateRes);
-        const x = await updateRes.json();
-        console.log("x "+x);
 
         if (!updateRes.ok) {
           const text = await updateRes.text();
@@ -182,10 +182,11 @@ function HomePage({ username }) {
       const uploadRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/uploadFileFn', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          task_id: taskId,
           filename: file.name,
           content_type: file.type,
           file_data: base64Data
@@ -201,12 +202,11 @@ function HomePage({ username }) {
       if (attachment_key) {
         attachment_s3_keys.push(attachment_key);
       }
-      console.log("attachment_s3_keys "+attachment_s3_keys);
     }
 
     // Step 2: Send update to Lambda (DynamoDB metadata update)
-    const updateRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/updateTaskFn', {
-      method: 'POST',
+    const updateRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/updateTask', {
+      method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -335,7 +335,7 @@ function HomePage({ username }) {
                 )}
               </span>
 
-              <span>
+              <span className="status-actions">
                 <select
                   value={task.status}
                   onChange={async (e) => {
@@ -346,8 +346,12 @@ function HomePage({ username }) {
 
                     try {
                       const token = auth.user?.id_token;
+                      console.log("Auth user object:", auth.user);
+                      console.log("Auth user profile:", auth.user?.profile);
                       const userId = auth.user?.profile?.sub ?? auth.user.sub;
-
+                      console.log("userId "+userId);  
+                      console.log("task object:", task);
+                      console.log("task.task_id "+task.task_id);
                       await uploadAndUpdateTask({
                         token,
                         userId,
@@ -372,6 +376,17 @@ function HomePage({ username }) {
                   <option value="InProgress">In Progress</option>
                   <option value="Done">Done</option>
                 </select>
+                <button 
+                  className="details-btn" 
+                  onClick={() => {
+                    setSelectedTask(task);
+                    setEditedTitle(task.title);
+                    setEditedDescription(task.description || "");
+                    setShowDetailsModal(true);
+                  }}
+                >
+                  <img src={EditIcon} alt="Details" />
+                </button>
                 <button className="delete-btn" onClick={() => { /* placeholder */ }}>
                   <img src={DeleteIcon} alt="Delete" />
                 </button>
@@ -380,6 +395,102 @@ function HomePage({ username }) {
           ))
         )}
       </div>
+
+      {showDetailsModal && selectedTask && (
+        <div className="modal-overlay">
+          <div className="modal-box details-modal">
+            <div className="modal-header">
+              <h2>Task Details</h2>
+              <img
+                src={CancelIcon}
+                alt="Close"
+                className="close-icon"
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  setSelectedTask(null);
+                  setNewAttachment(null);
+                }}
+              />
+            </div>
+
+            <div className="modal-body">
+              <label className="input-label">Title</label>
+              <input
+                type="text"
+                className="text-input"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+              />
+
+              <label className="input-label">Description</label>
+              <textarea
+                className="text-input description-input"
+                value={editedDescription}
+                onChange={(e) => setEditedDescription(e.target.value)}
+                placeholder="Add a description..."
+              />
+
+              <label className="input-label">Current Attachment</label>
+              {selectedTask.attachments && selectedTask.attachments[0]?.url ? (
+                <div className="attachment-preview">
+                  <a
+                    href={selectedTask.attachments[0].url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img src={AttachmentIcon} className="icon" alt="file" />
+                    {selectedTask.attachments[0].filename || "View Attachment"}
+                  </a>
+                </div>
+              ) : (
+                <div className="no-attachment">
+                  <img src={NoFileIcon} className="icon" alt="no file" />
+                  No file attached
+                </div>
+              )}
+
+              <label className="input-label">Upload New Attachment <span className="optional">(optional)</span></label>
+              <div className="file-upload">
+                <input 
+                  type="file" 
+                  id="newFile" 
+                  className="file-input"
+                  onChange={(e) => setNewAttachment(e.target.files[0])}
+                />
+              </div>
+              <p className="file-note">Supported: PDF, DOCX, max 5MB</p>
+
+              <button 
+                className="save-btn"
+                onClick={async () => {
+                  try {
+                    const token = auth.user?.id_token;
+                    const userId = auth.user?.profile?.sub ?? auth.user.sub;
+
+                    await uploadAndUpdateTask({
+                      token,
+                      userId,
+                      taskId: selectedTask.task_id,
+                      title: editedTitle,
+                      description: editedDescription,
+                      file: newAttachment
+                    });
+
+                    setShowDetailsModal(false);
+                    setSelectedTask(null);
+                    setNewAttachment(null);
+                  } catch (err) {
+                    console.error("Failed to update task:", err);
+                    setError(err.message);
+                  }
+                }}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
