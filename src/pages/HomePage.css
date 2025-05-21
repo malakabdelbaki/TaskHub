@@ -320,14 +320,14 @@ body, html {
 .status-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
   justify-content: space-between;
-  width: 100%;
+  width: 260px;
+  gap: 0;
 }
 
 .delete-btn {
-  margin-left: 4rem; 
-  margin-right: 0.2rem;
+  margin-left: 0;
+  margin-right: 0;
   background: none;
   border: none;
   cursor: pointer;
@@ -346,6 +346,159 @@ body, html {
 
 .delete-btn:hover img {
   opacity: 1;
+}
+
+.details-btn {
+  margin-left: 0;
+  margin-right: 0.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.details-btn img {
+  width: 24px;
+  height: 24px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.details-btn:hover img {
+  opacity: 1;
+}
+
+.details-modal {
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 20px;
+  width: 95%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.details-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.details-modal .modal-header h2 {
+  color: #407BFF;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.details-modal .close-icon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.details-modal .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.details-modal .form-group {
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.details-modal .input-label {
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  margin-top: 1rem;
+}
+
+.details-modal .text-input,
+.details-modal .description-input {
+  padding: 0.8rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 0.2rem;
+}
+
+.details-modal .description-input {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.details-modal .attachment-preview {
+  margin-top: 0.2rem;
+  padding: 0.6rem 1rem;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.details-modal .attachment-preview a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #407BFF;
+  font-size: 1rem;
+}
+
+.details-modal .no-attachment {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  margin-top: 0.2rem;
+  font-size: 1rem;
+}
+
+.details-modal .file-upload {
+  margin-top: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.details-modal .file-input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.details-modal .file-note {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+  margin-top: 0.3rem;
+}
+
+.details-modal .save-btn {
+  margin-top: 1.5rem;
+  padding: 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: #407BFF;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  width: 100%;
+}
+
+.details-modal .save-btn:hover {
+  background-color: #305edb;
 }
 
 
