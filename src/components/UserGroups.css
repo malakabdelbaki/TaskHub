@@ -1,64 +1,75 @@
 .user-groups {
     width: 100%;
-    padding: 1rem;
+    padding: 2rem;
     background: none;
     border-radius: 0;
     box-shadow: none;
+    max-width: 1400px;
+    margin: 0 auto;
   }
   
   .groups-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
   }
   
   .groups-header h2 {
     margin: 0;
-    color: #333;
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 700;
   }
   
   .create-group-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background-color: #007bff;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #407BFF;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(64, 123, 255, 0.2);
   }
   
   .create-group-btn:hover {
-    background-color: #0056b3;
+    background-color: #305edb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(64, 123, 255, 0.3);
   }
   
   .add-icon {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
   }
   
   .groups-container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
+    padding: 0 1rem;
   }
   
   .group-section {
     background: white;
-    padding: 20px;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     width: 100%;
   }
   
   .group-section h3 {
-    margin: 0 0 1rem 0;
-    color: #495057;
-    font-size: 1.1rem;
+    margin: 0 0 1.5rem 0;
+    color: #2c3e50;
+    font-size: 24px;
+    font-weight: 700;
   }
   
   .group-container {
@@ -67,88 +78,98 @@
   
   .group-card {
     background-color: white;
-    border-radius: 8px;
-    padding: 1rem;
+    border-radius: 12px;
+    padding: 1.5rem;
     margin-bottom: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.2s ease;
+    border: 1px solid #e0e7ff;
   }
   
   .group-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #407BFF;
   }
   
   .group-card.selected {
-    border: 2px solid #007bff;
+    border: 2px solid #407BFF;
+    background-color: #f8f9ff;
   }
   
   .group-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
   }
   
   .group-card-header h3 {
     margin: 0;
-    color: #333;
-    font-size: 1.1rem;
+    color: #2c3e50;
+    font-size: 20px;
+    font-weight: 600;
   }
   
   .group-role {
     margin: 0;
-    color: #6c757d;
-    font-size: 0.9rem;
+    color: #5a6268;
+    font-size: 15px;
+    font-weight: 500;
   }
   
   .task-groups-section {
-    margin-top: 1rem;
-    padding: 1rem;
+    margin-top: 1.5rem;
+    padding: 1.5rem;
     background-color: #f8f9fa;
-    border-radius: 8px;
+    border-radius: 12px;
   }
   
   .task-group-container {
     background-color: white;
-    border-radius: 6px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
   
   .task-group-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid #e9ecef;
   }
   
   .task-group-header h4 {
     margin: 0;
-    color: #333;
-    font-size: 1rem;
+    color: #2c3e50;
+    font-size: 18px;
+    font-weight: 600;
   }
   
   .create-task-btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 0.8rem;
-    background-color: #6c757d;
+    padding: 0.75rem 1.25rem;
+    background-color: #407BFF;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 0.8rem;
-    transition: background-color 0.2s;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(64, 123, 255, 0.2);
   }
   
   .create-task-btn:hover {
-    background-color: #5a6268;
+    background-color: #305edb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(64, 123, 255, 0.3);
   }
   
   .tasks-list {
@@ -212,18 +233,22 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 0.8rem;
+    padding: 0.75rem 1.25rem;
     background-color: #28a745;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 0.8rem;
-    transition: background-color 0.2s;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
   }
   
   .create-task-group-btn:hover {
     background-color: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
   }
   
   .modal-overlay {

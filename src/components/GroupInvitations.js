@@ -117,52 +117,77 @@ const GroupInvitations = ({ userId, onInvitationHandled, groups, fetchUserGroups
 
   return (
     <div className="group-invitations">
-      <h2>Group Invitations</h2>
+      <h2>
+        <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Group Invitations
+      </h2>
+
       <div className="send-invite-form">
         <h3>Send Group Invitation</h3>
-        <input
-          type="email"
-          placeholder="Invitee Email"
-          value={inviteEmail}
-          onChange={(e) => setInviteEmail(e.target.value)}
-        />
-        <select
-          value={selectedGroupId}
-          onChange={(e) => setSelectedGroupId(e.target.value)}
-          className="group-select"
-        >
-          <option value="">Select a group</option>
-          {groups && groups.length > 0 ? (
-            groups.map((group) => (
-              <option key={group.group_id} value={group.group_id}>
-                {group.group_name || group.name}
-              </option>
-            ))
-          ) : (
-            <option value="" disabled>No groups available</option>
-          )}
-        </select>
+        <div className="form-group">
+          <input
+            type="email"
+            placeholder="Enter invitee email address"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            className="email-input"
+          />
+          <select
+            value={selectedGroupId}
+            onChange={(e) => setSelectedGroupId(e.target.value)}
+            className="group-select"
+          >
+            <option value="">Select a group</option>
+            {groups && groups.length > 0 ? (
+              groups.map((group) => (
+                <option key={group.group_id} value={group.group_id}>
+                  {group.group_name || group.name}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>No groups available</option>
+            )}
+          </select>
+        </div>
         <button 
           onClick={handleSendInvite} 
           disabled={sendingInvite || !selectedGroupId || !inviteEmail}
+          className="send-invite-button"
         >
-          {sendingInvite ? 'Sending...' : 'Send Invite'}
+          {sendingInvite ? (
+            <>
+              <span className="spinner"></span>
+              Sending...
+            </>
+          ) : (
+            'Send Invite'
+          )}
         </button>
-        {inviteStatus && <p className={inviteStatus.includes('Failed') ? 'error' : 'success'}>{inviteStatus}</p>}
+        {inviteStatus && (
+          <p className={`status-message ${inviteStatus.includes('Failed') ? 'error' : 'success'}`}>
+            {inviteStatus}
+          </p>
+        )}
       </div>
-
-      {invitations.length === 0 ? (
-        <p>No pending invitations</p>
-      ) : (
-        <div className="invitations-list">
-          {invitations.map((invitation) => (
+      <div className="invitations-list">
+        {invitations.length === 0 ? (
+          <div className="no-invitations">
+            <p>No pending invitations</p>
+          </div>
+        ) : (
+          invitations.map((invitation) => (
             <div key={invitation.invitation_id} className="invitation-card">
               <div className="invitation-info">
                 <h3>{invitation.group_name}</h3>
-                <p>Invited by: {invitation.invited_by}</p>
+                <p>Invited by: {invitation.invited_by_name}</p>
               </div>
               <div className="invitation-actions">
-              <button
+                <button
                   className="accept-btn"
                   onClick={() => handleInvitation(invitation.invitation_id, true)}
                 >
@@ -176,9 +201,9 @@ const GroupInvitations = ({ userId, onInvitationHandled, groups, fetchUserGroups
                 </button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };
