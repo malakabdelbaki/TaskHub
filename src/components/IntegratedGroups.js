@@ -12,6 +12,7 @@ import AddIcon from "../icons/AddIcon.svg";
 import CancelIcon from "../icons/CancelIcon.svg";
 import DeleteIcon from "../icons/DeleteIcon.svg";
 import EditIcon from "../icons/editIcon.png";
+import GroupInvitations from "./GroupInvitations";
 
 const IntegratedGroups = ({ username }) => {
   const navigate = useNavigate();
@@ -383,7 +384,7 @@ const IntegratedGroups = ({ username }) => {
     }
   }, [selectedGroup]);
 
-  if (loading) return <div className="loading">Loading groups...</div>;
+  // if (loading) return <div className="loading">Loading groups...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
@@ -404,6 +405,8 @@ const IntegratedGroups = ({ username }) => {
       </div>
 
       <div className="main-content">
+        <GroupInvitations userId={userId} groups={groups} fetchUserGroups={fetchUserGroups} />
+
         <div className="user-groups">
           <div className="groups-header">
             <h2>Your Groups</h2>
