@@ -1,0 +1,104 @@
+.group-invitations {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.group-invitations h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.invitations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.invitation-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.invitation-info h3 {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-size: 18px;
+}
+
+.invitation-info p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.invitation-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.accept-btn, .decline-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.accept-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.accept-btn:hover {
+  background-color: #45a049;
+}
+
+.decline-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.decline-btn:hover {
+  background-color: #da190b;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+.error {
+  color: #f44336;
+  text-align: center;
+  padding: 20px;
+} 
+
+.send-invite-form {
+  margin-bottom: 20px;
+}
+
+.send-invite-form input {
+  margin-right: 10px;
+  padding: 6px;
+}
+
+.send-invite-form button {
+  padding: 6px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.send-invite-form button:disabled {
+  background-color: #aaa;
+}
