@@ -99,9 +99,10 @@ Deploy Lambda functions:
 
 ### 8. Monitoring
 - CloudWatch Logs and Alarms for:
-  - Lambda errors
-  - API latency
-  - SQS delay
+  - High Lambda errors
+  - API Gateway latency
+  - EC2 CPU utilization
+
 
 ### 9. Frontend Deployment
 - Deploy React app to EC2 (Apache).
