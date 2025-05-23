@@ -29,7 +29,8 @@ A scalable and secure Task Management System built on AWS, supporting task track
 
 7. **Monitoring and Logging**
    - Real-time monitoring with CloudWatch.
-   - Alerts for high error rates, API latency, and queue delays.
+   - Alarms for High Lambda errors, API Gateway latency, EC2 CPU utilization
+
 
 ---
 
