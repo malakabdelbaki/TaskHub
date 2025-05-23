@@ -10,8 +10,10 @@ function ProfilePage({ name, email }) {
   const navigate = useNavigate();
 
   const signOutRedirect = () => {
+     localStorage.clear();  // or remove specific keys
+  sessionStorage.clear();
     const clientId = "7kp7g3giro4pav3qo9keq36l2l";
-    const logoutUri = "https://13.60.229.122?post_logout=true";
+    const logoutUri = "https://51.20.32.229/logout-success";
     const cognitoDomain = "https://eu-north-1eh2sejlbm.auth.eu-north-1.amazoncognito.com";
 
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
