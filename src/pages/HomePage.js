@@ -27,9 +27,15 @@ function HomePage({ username }) {
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
   const [newAttachment, setNewAttachment] = useState(null);
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskPriority, setTaskPriority] = useState("medium");
+  const [taskDeadline, setTaskDeadline] = useState("");
+  const [taskGroupId, setTaskGroupId] = useState("");
+  const [userGroupId, setUserGroupId] = useState("");
 
   const fetchTasks = async () => {
     try {
+      console.log("Starting fetchTasks...");
       setIsLoading(true);
       setError(null);
 
@@ -38,6 +44,8 @@ function HomePage({ username }) {
       
       const userId = auth.user.profile?.sub ?? auth.user.sub;
       if (!userId) throw new Error('No user ID available');
+
+      console.log("Fetching tasks for user:", userId);
 
       const response = await fetch(
         `https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/listTasksFn?user_id=${userId}`,
@@ -54,9 +62,17 @@ function HomePage({ username }) {
       }
 
       const { tasks } = await response.json();
+      console.log("Raw tasks data from backend:", tasks);
       setTasks(tasks || []);
-      for (const task of tasks) {
-        console.log("task "+task);
+      
+      if (tasks && tasks.length > 0) {
+        console.log("First task sample:", {
+          id: tasks[0].task_id,
+          title: tasks[0].title,
+          priority: tasks[0].priority,
+          deadline: tasks[0].deadline,
+          status: tasks[0].status
+        });
       }
 
     } catch (error) {
@@ -70,6 +86,7 @@ function HomePage({ username }) {
 
   useEffect(() => {
     if (auth.isAuthenticated && auth.user?.id_token) {
+      console.log("Fetching tasks on component mount...");
       fetchTasks();
     } else {
       console.log('Not authenticated or no token available');
@@ -78,13 +95,22 @@ function HomePage({ username }) {
 
   const handleSubmit = async () => {
     try {
+      console.log("Starting task creation...");
       const token = auth.user?.id_token;
       if (!token) throw new Error('Not logged in');
       const uid = auth.user.profile?.sub ?? auth.user.sub;
       if (!uid) throw new Error('User ID missing');
       if (!taskTitle.trim()) throw new Error('Title required');
 
-      // 1️⃣ Create the task first without attachments
+      console.log("Creating task with data:", {
+        title: taskTitle,
+        description: taskDescription,
+        priority: taskPriority,
+        deadline: taskDeadline,
+        status: 'ToDo'
+      });
+
+      // Create the task with all required attributes
       const taskRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/createTaskFn', {
         method: 'POST',
         headers: {
@@ -95,7 +121,12 @@ function HomePage({ username }) {
           user_id: uid,
           title: taskTitle,
           status: 'ToDo',
-          attachment_keys: []  // no attachments yet
+          description: taskDescription || '',
+          priority: taskPriority,
+          deadline: taskDeadline || null,
+          task_group_id: taskGroupId || null,
+          user_group_id: userGroupId || null,
+          attachment_keys: []
         })
       });
 
@@ -105,8 +136,8 @@ function HomePage({ username }) {
       }
 
       const { task_id } = await taskRes.json();
-      // 2️⃣ Upload file if any, get attachment_key
-      let attachment_key = null;
+
+      // Handle file upload if any
       if (selectedFile) {
         const fileContent = await selectedFile.arrayBuffer();
         const base64Data = btoa(
@@ -134,32 +165,32 @@ function HomePage({ username }) {
         }
 
         const uploadData = await uploadRes.json();
-        attachment_key = uploadData.attachment_key;
-      }
-
-      // 3️⃣ Update the task with the attachment_key and task_id
-      if (attachment_key) {
-        const updateRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/updateTask', {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            user_id: uid,
-            task_id: task_id,
-            attachment_s3_keys: [attachment_key]
-          })
-        });
-
-        if (!updateRes.ok) {
-          const text = await updateRes.text();
-          throw new Error(`Update task failed: ${text}`);
+        if (uploadData.attachment_key) {
+          // Update task with attachment key
+          await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/updateTask', {
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              user_id: uid,
+              task_id: task_id,
+              title: taskTitle,
+              status: 'ToDo',
+              attachment_s3_keys: [uploadData.attachment_key]
+            })
+          });
         }
       }
 
-      await fetchTasks(); // refresh the list after create + update
+      await fetchTasks();
       setTaskTitle('');
+      setTaskDescription('');
+      setTaskPriority('medium');
+      setTaskDeadline('');
+      setTaskGroupId('');
+      setUserGroupId('');
       setSelectedFile(null);
       setShowModal(false);
 
@@ -169,7 +200,11 @@ function HomePage({ username }) {
     }
   };
 
-  async function uploadAndUpdateTask({ token, userId, taskId, title, status, file }) {
+  async function uploadAndUpdateTask({ token, userId, taskId, title, status, description, priority, deadline, file }) {
+    if (!taskId || !userId) {
+      throw new Error('Missing task_id or user_id');
+    }
+
     const attachment_s3_keys = [];
 
     // Step 1: Upload new file (if any)
@@ -204,7 +239,7 @@ function HomePage({ username }) {
       }
     }
 
-    // Step 2: Send update to Lambda (DynamoDB metadata update)
+    // Step 2: Send update to Lambda with all required fields
     const updateRes = await fetch('https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/updateTask', {
       method: 'PUT',
       headers: {
@@ -212,10 +247,13 @@ function HomePage({ username }) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        user_id: userId,
         task_id: taskId,
-        ...(title && { title }),
-        ...(status && { status }),
+        user_id: userId,
+        title: title,
+        status: status,
+        description: description || '',
+        priority: priority || 'medium',
+        deadline: deadline || null,
         attachment_s3_keys
       })
     });
@@ -263,25 +301,79 @@ function HomePage({ username }) {
             </div>
 
             <div className="modal-body">
-              <label className="input-label">Task Title</label>
-              <input
-                type="text"
-                className="text-input"
-                placeholder="e.g., Submit Assignment"
-                value={taskTitle}
-                onChange={(e) => setTaskTitle(e.target.value)}
-              />
-
-              <label className="input-label">Attachment <span className="optional">(optional)</span></label>
-              <div className="file-upload">
-                <input 
-                  type="file" 
-                  id="file" 
-                  className="file-input"
-                  onChange={(e) => setSelectedFile(e.target.files[0])}
+              <div className="form-group">
+                <label className="input-label">Task Title</label>
+                <input
+                  type="text"
+                  className="text-input"
+                  placeholder="e.g., Submit Assignment"
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
                 />
               </div>
-              <p className="file-note">Supported: PDF, DOCX, max 5MB</p>
+
+              <div className="form-group">
+                <label className="input-label">Description</label>
+                <textarea
+                  className="text-input description-input"
+                  placeholder="Add task description..."
+                  value={taskDescription}
+                  onChange={(e) => setTaskDescription(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="input-label">Priority</label>
+                <select
+                  className="text-input priority-select"
+                  value={taskPriority}
+                  onChange={(e) => setTaskPriority(e.target.value)}
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="input-label">Deadline</label>
+                <input
+                  type="datetime-local"
+                  className="text-input deadline-input"
+                  value={taskDeadline}
+                  onChange={(e) => setTaskDeadline(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="input-label">Status</label>
+                <select
+                  className="text-input status-select"
+                  value="ToDo"
+                  disabled
+                >
+                  <option value="ToDo">To Do</option>
+                  <option value="InProgress">In Progress</option>
+                  <option value="Done">Done</option>
+                </select>
+                <p className="form-note">New tasks are always set to 'To Do' initially</p>
+              </div>
+
+              <div className="form-group">
+                <label className="input-label">Attachment <span className="optional">(optional)</span></label>
+                <div className="file-upload">
+                  <input 
+                    type="file" 
+                    id="file" 
+                    className="file-input"
+                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                  />
+                  <label htmlFor="file" className="file-upload-label">
+                    {selectedFile ? selectedFile.name : 'Choose File'}
+                  </label>
+                </div>
+                <p className="file-note">Supported: PDF, DOCX, max 5MB</p>
+              </div>
 
               <button 
                 className="add-task-btn"
@@ -297,12 +389,11 @@ function HomePage({ username }) {
       <div className="task-table">
         <div className="table-header">
           <span>Task</span>
-          <span>
-            <img src={AttachmentIcon} className="icon" /> Attachment
-          </span>
-          <span>
-            <img src={StatusIcon} className="icon" /> Status
-          </span>
+          <span>Description</span>
+          <span>Priority</span>
+          <span>Deadline</span>
+          <span><img src={AttachmentIcon} className="icon" /> Attachment</span>
+          <span><img src={StatusIcon} className="icon" /> Status</span>
         </div>
 
         {isLoading ? (
@@ -314,18 +405,24 @@ function HomePage({ username }) {
         ) : (
           tasks.map((task, index) => (
             <div className="table-row" key={task.task_id}>
-              <span>{task.title}</span>
-
+              <span className="task-title">{task.title}</span>
+              <span className="description-cell">{task.description || 'No description'}</span>
+            
+              <span className={`priority-cell priority-${task.priority?.toLowerCase() || 'medium'}`}>
+                {task.priority ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : 'Medium'}
+              </span>
+              <span className="deadline-cell">
+                {task.deadline ? new Date(task.deadline).toLocaleString() : 'No deadline'}
+              </span>
               <span className="attachment-cell">
-                {Array.isArray(task.attachments) && task.attachments.length > 0 && task.attachments[0].url ? (
+                {Array.isArray(task.attachment_s3_keys) && task.attachment_s3_keys.length > 0 ? (
                   <a
-                    key={task.attachments[0].url}
-                    href={task.attachments[0].url}
+                    href={task.attachment_s3_keys[0]}
                     target="_blank"
                     rel="noopener noreferrer"  
                   >
                     <img src={AttachmentIcon} className="icon" alt="file" />
-                    {task.attachments[0].filename || "Download"}
+                    View Attachment
                   </a>
                 ) : (
                   <>
@@ -346,18 +443,16 @@ function HomePage({ username }) {
 
                     try {
                       const token = auth.user?.id_token;
-                      console.log("Auth user object:", auth.user);
-                      console.log("Auth user profile:", auth.user?.profile);
                       const userId = auth.user?.profile?.sub ?? auth.user.sub;
-                      console.log("userId "+userId);  
-                      console.log("task object:", task);
-                      console.log("task.task_id "+task.task_id);
                       await uploadAndUpdateTask({
                         token,
                         userId,
                         taskId: task.task_id,
+                        title: task.title,
                         status: newStatus,
-                        title: task.title
+                        description: task.description,
+                        priority: task.priority,
+                        deadline: task.deadline
                       });
                     } catch (err) {
                       console.error("Failed to update task:", err);
@@ -472,7 +567,10 @@ function HomePage({ username }) {
                       userId,
                       taskId: selectedTask.task_id,
                       title: editedTitle,
+                      status: selectedTask.status,
                       description: editedDescription,
+                      priority: selectedTask.priority,
+                      deadline: selectedTask.deadline,
                       file: newAttachment
                     });
 

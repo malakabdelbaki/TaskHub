@@ -13,6 +13,8 @@ import CancelIcon from "../icons/CancelIcon.svg";
 import DeleteIcon from "../icons/DeleteIcon.svg";
 import EditIcon from "../icons/editIcon.png";
 import GroupInvitations from "./GroupInvitations";
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const IntegratedGroups = ({ username }) => {
   const navigate = useNavigate();
@@ -150,6 +152,7 @@ const IntegratedGroups = ({ username }) => {
           user_id: userId,
           title: newTaskTitle,
           status: 'ToDo',
+          description: newTaskDescription,
           task_group_id: selectedTaskGroupForTask.group_id,
           user_group_id: selectedGroup.group_id,
           priority: 'Low',
@@ -242,7 +245,7 @@ const IntegratedGroups = ({ username }) => {
             task_id: taskId,
             filename: updates.file.name,
             content_type: updates.file.type,
-            file_data: base64Data
+            file_data: base64Data,
           })
         });
 
@@ -266,6 +269,8 @@ const IntegratedGroups = ({ username }) => {
           ...(updates.title && { title: updates.title }),
           ...(updates.status && { status: updates.status }),
           ...(updates.description && { description: updates.description }),
+          ...(updates.deadline && { deadline: updates.deadline }),
+          ...(updates.priority && { priority: updates.priority }),
           attachment_s3_keys
         })
       });
@@ -373,6 +378,65 @@ const IntegratedGroups = ({ username }) => {
       setError('Failed to create task group');
     }
   };
+  
+  const handleDeleteTaskGroup = async (group_id, user_group_id) => {
+    const confirmed = window.confirm("Are you sure you want to delete this task group?");
+    if (!confirmed) return;
+  
+    try {
+      const response = await fetch(
+        "https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/TaskGroupManager/delete-task-group",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ group_id}),
+        }
+      );
+  
+      const result = await response.json();
+      if (response.ok) {
+        alert("Task group deleted");
+        fetchTaskGroups(user_group_id); // Replace with your actual refresh function
+      } else {
+        alert("Failed to delete task group: " + result.message);
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Error deleting task group.");
+    }
+  };
+  
+const handleExitGroup = async (group_id) => {
+  try {
+    const user_id = auth.user?.profile?.sub ?? auth.user.sub;
+
+    const res = await fetch(
+      'https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/UserGroupManagement/exit-user-group',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ group_id, user_id }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || 'Failed to exit group');
+
+    alert(data.message);
+
+    // Optional: refresh group list or remove exited group from UI
+    await fetchUserGroups();
+    setSelectedGroup(null);
+  } catch (err) {
+    console.error('Error exiting group:', err);
+    alert('Failed to exit group. Please try again.');
+  }
+};
 
   useEffect(() => {
     fetchUserGroups();
@@ -427,6 +491,8 @@ const IntegratedGroups = ({ username }) => {
                   >
                     <div className="group-card-header">
                       <h3>{group.group_name}</h3>
+                                                   <div className="task-group-actions">
+
                       <button 
                         className="create-task-group-btn"
                         onClick={(e) => {
@@ -438,6 +504,16 @@ const IntegratedGroups = ({ username }) => {
                         <img src={AddIcon} alt="Add Task Group" className="add-icon" />
                         New Task Group
                       </button>
+                      <button
+            className="exit-group-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleExitGroup(group.group_id);
+            }}
+          >
+            Exit Group
+          </button>
+          </div>
                     </div>
                     <p className="group-role">{group.role}</p>
                   </div>
@@ -448,57 +524,127 @@ const IntegratedGroups = ({ username }) => {
                         <div key={taskGroup.group_id} className="task-group-container">
                           <div className="task-group-header">
                             <h4>{taskGroup.name}</h4>
-                            <button 
-                              className="create-task-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedTaskGroupForTask(taskGroup);
-                                setSelectedGroupForTaskGroup(group);
-                                setShowCreateTaskModal(true);
-                              }}
-                            >
-                              <img src={AddIcon} alt="Add Task" className="add-icon" />
-                              New Task
-                            </button>
-                          </div>
-                          <div className="tasks-list">
-                            {groupTasks[group.group_id]?.[taskGroup.group_id]?.map((task) => (
-                              <div key={task.task_id} className="task-item">
-                                <div className="task-title">{task.title}</div>
-                                <div className="task-actions">
-                                  <select
-                                    value={task.status}
-                                    onChange={(e) => handleUpdateTask(task.task_id, { status: e.target.value })}
-                                    className={`status-dropdown ${
-                                      task.status === "Done"
-                                        ? "status-done"
-                                        : task.status === "InProgress"
-                                          ? "status-in-progress"
-                                          : "status-todo"
-                                    }`}
-                                  >
-                                    <option value="ToDo">To Do</option>
-                                    <option value="InProgress">In Progress</option>
-                                    <option value="Done">Done</option>
-                                  </select>
-                                  <button 
-                                    className="details-btn" 
-                                    onClick={() => {
-                                      setSelectedTask(task);
-                                      setEditedTitle(task.title);
-                                      setEditedDescription(task.description || "");
-                                      setShowDetailsModal(true);
-                                    }}
-                                  >
-                                    <img src={EditIcon} alt="Details" />
-                                  </button>
-                                  <button className="delete-btn" onClick={() => handleDeleteTask(task.task_id, group.group_id)}>
-                                    <img src={DeleteIcon} alt="Delete" />
-                                  </button>
+                             <div className="task-group-actions">
+
+
+  <button
+    className="create-task-btn"
+    onClick={(e) => {
+      e.stopPropagation();
+      setSelectedTaskGroupForTask(taskGroup);
+      setSelectedGroupForTaskGroup(group);
+      setShowCreateTaskModal(true);
+    }}
+  >
+    <img src={AddIcon} alt="Add Task" className="add-icon" />
+    New Task
+  </button>
+
+    <button
+    className="delete-task-group-btn"
+    onClick={(e) => {
+      e.stopPropagation();
+      handleDeleteTaskGroup(taskGroup.group_id, selectedGroup.group_id);
+    }}
+  >
+    Delete Task Group
+  </button>
+
+    
+</div>
+
                                 </div>
-                              </div>
-                            ))}
-                            {(!groupTasks[group.group_id]?.[taskGroup.group_id] || 
+                                <div className="tasks-list">
+
+                                  <div className="task-grid task-header">
+                                    <span>Task</span>
+                                    <span>Description</span>
+                                    <span>Priority</span>
+                                    <span>Deadline</span>
+                                    <span><img src={AttachmentIcon} className="icon" alt="attachment" /> Attachment</span>
+                                    <span><img src={StatusIcon} className="icon" alt="status" /> Status</span>
+                                  </div>
+
+                                  {groupTasks[group.group_id]?.[taskGroup.group_id]?.length > 0 ? (
+                                    groupTasks[group.group_id][taskGroup.group_id].map((task) => (
+                                      <div className="task-grid task-row" key={task.task_id}>
+                                        <span className="task-title">{task.title}</span>
+                                        <span className="description-cell">{task.description || 'No description'}</span>
+                                        <span className="priority-cell">
+  <select
+    value={task.priority || 'Medium'}
+    onChange={(e) =>
+      handleUpdateTask(task.task_id, { priority: e.target.value })
+    }
+    className={`priority-dropdown priority-${(task.priority || 'Medium').toLowerCase()}`}
+  >
+    <option value="low">Low</option>
+    <option value="medium">Medium</option>
+    <option value="high">High</option>
+  </select>
+</span>
+
+
+                                        <span className="deadline-cell">
+                                          <DatePicker
+                                            selected={task.deadline ? new Date(task.deadline) : null}
+                                            onChange={(date) =>
+                                              handleUpdateTask(task.task_id, {
+                                                deadline: date?.toISOString() || null,
+                                              })
+                                            }
+                                            showTimeSelect
+                                            dateFormat="Pp"
+                                            placeholderText="Set deadline"
+                                            className="deadline-picker"
+                                          />
+                                        </span>
+
+                                        <span className="attachment-cell">
+                                          {Array.isArray(task.attachment_s3_keys) && task.attachment_s3_keys.length > 0 ? (
+                                            <a href={task.attachments[0].url} target="_blank" rel="noopener noreferrer">
+                                              <img src={AttachmentIcon} className="icon" alt="file" /> View
+                                            </a>
+                                          ) : (
+                                            <>
+                                              <img src={NoFileIcon} className="icon" alt="no file" /> No file
+                                            </>
+                                          )}
+                                        </span>
+                                        <span className="status-actions">
+                                          <select
+                                            value={task.status}
+                                            onChange={(e) => handleUpdateTask(task.task_id, { status: e.target.value })}
+                                            className={`status-dropdown ${
+                                              task.status === "Done"
+                                                ? "status-done"
+                                                : task.status === "InProgress"
+                                                ? "status-in-progress"
+                                                : "status-todo"
+                                            }`}
+                                          >
+                                            <option value="ToDo">To Do</option>
+                                            <option value="InProgress">In Progress</option>
+                                            <option value="Done">Done</option>
+                                          </select>
+                                          <button className="details-btn" onClick={() => {
+          setSelectedTask(task);
+          setEditedTitle(task.title);
+          setEditedDescription(task.description || "");
+          setShowDetailsModal(true);
+        }}>
+          <img src={EditIcon} alt="Edit" />
+        </button>
+        <button className="delete-btn" onClick={() => handleDeleteTask(task.task_id, group.group_id)}>
+          <img src={DeleteIcon} alt="Delete" />
+        </button>
+      </span>
+    </div>
+  ))
+) : (
+  
+                      
+                           !groupTasks[group.group_id]?.[taskGroup.group_id] || 
                               groupTasks[group.group_id][taskGroup.group_id].length === 0) && (
                               <div className="no-tasks">No tasks in this group</div>
                             )}
@@ -632,7 +778,6 @@ const IntegratedGroups = ({ username }) => {
                 )}
               </div>
               <p className="file-note">Supported: PDF, DOCX, max 5MB</p>
-
               <button 
                 className="create-btn" 
                 onClick={handleCreateTask}
@@ -688,7 +833,7 @@ const IntegratedGroups = ({ username }) => {
                     rel="noopener noreferrer"
                   >
                     <img src={AttachmentIcon} className="icon" alt="file" />
-                    {selectedTask.attachments[0].filename || "View Attachment"}
+                    {selectedTask.attachments[0].url || "View Attachment"}
                   </a>
                 </div>
               ) : (
