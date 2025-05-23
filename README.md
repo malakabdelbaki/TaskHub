@@ -1,70 +1,141 @@
-# Getting Started with Create React App
+# Task Management System on AWS
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A scalable and secure Task Management System built on AWS, supporting task tracking, group collaboration, and file sharing with real-time notifications.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+1. **User Authentication and Management**
+   - Secure sign-up and login using AWS Cognito.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+2. **Task Management**
+   - Create, update, delete, and view tasks.
+   - Set priority, due date, and status.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+3. **User Groups**
+   - Create user groups and invite others to collaborate.
+   - Share tasks within the same group for team productivity.
 
-### `npm test`
+4. **Task Groups**
+   - Organize tasks into logical task groups for better project management.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+5. **File Attachments**
+   - Upload and attach files to tasks.
+   - Files are securely stored in Amazon S3.
 
-### `npm run build`
+6. **Notifications**
+   - Email notifications for task updates via Amazon SQS and SES.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+7. **Monitoring and Logging**
+   - Real-time monitoring with CloudWatch.
+   - Alerts for high error rates, API latency, and queue delays.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Architecture Overview
 
-### `npm run eject`
+The system integrates the following AWS services:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **Cognito**: User authentication
+- **RDS**: Relational database for task data
+- **DynamoDB**: Metadata storage
+- **S3**: File attachment storage
+- **Lambda**: Backend logic
+- **API Gateway**: API endpoint management
+- **SQS & SES**: Notification queue and email service
+- **CloudWatch**: Monitoring and logs
+- **EC2**: Hosting the React frontend
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Below is a visual representations of the AWS services used in the Task Management System and their interactions:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+![architecture diagram](https://github.com/user-attachments/assets/ad979339-571d-4288-9ae6-72af55936e6e)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## Setup Guide
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 1. VPC Setup
+Create a VPC with public/private subnets to isolate resources securely.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 2. Cognito
+- Go to AWS Cognito → Manage User Pools → Create a User Pool.
+- Set up:
+ - Pool name: UserPool
+ - Attributes: Enable Email for sign-in.
+ - Password Policy
+   - Password minimum length: 8 character(s)
+   - Temporary passwords set by administrators expire in 7 day(s)
+   - Allow reuse of previous passwords
+   - Password requirements:
+     - Contains at least 1 number
+     - Contains at least 1 special character
+     - Contains at least 1 uppercase letter
+     - Contains at least 1 lowercase letter
+   - App Client: Create a new app client (TaskManagementApp). 
 
-### Code Splitting
+### 3. Databases
+- **RDS**: MySQL/PostgreSQL with secure credentials.
+- **DynamoDB**: Table `TaskMetadata` with `taskId` and `userId`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 4. S3 Bucket
+- Name: `task-management-bucket5228`
+- Enable block public access.
+- Create read/write IAM policy.
 
-### Analyzing the Bundle Size
+### 5. Lambda Functions
+Deploy Lambda functions:
+- `createTaskFn`, `updateTaskFn`, `deleteTaskFn`, `listTasksFn`
+- `TaskGroupManager`, `UserGroupManagement`
+- `Send-task-email-notification`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 6. API Gateway
+- Create HTTP API with defined endpoints.
+- Deploy to `prod` stage.
 
-### Making a Progressive Web App
+### 7. Notifications
+- SQS Queue: `task-updates-queue`
+- Integrate with update Lambda to trigger email Lambda.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### 8. Monitoring
+- CloudWatch Logs and Alarms for:
+  - Lambda errors
+  - API latency
+  - SQS delay
 
-### Advanced Configuration
+### 9. Frontend Deployment
+- Deploy React app to EC2 (Apache).
+- Setup HTTPS, reverse proxy for APIs, SSL certs.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### 10. IAM Roles
+Assign correct policies to:
+- EC2 (S3, DynamoDB, Cognito)
+- Lambda (RDS, SQS, DynamoDB)
 
-### Deployment
+### 11. SES (Email)
+- Verify sender and recipient emails in sandbox mode.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## 👤 User Guide
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### 1. Sign Up / Login
+- Securely register/login using Cognito.
+- Managed via web frontend.
+
+### 2. Task Operations
+- Add, update, delete, and filter tasks.
+- Set status, due date, and priority.
+
+### 3. Group Collaboration
+- Invite users to join groups.
+- Share and assign tasks within groups.
+
+### 4. File Upload
+- Attach documents/images to tasks securely.
+
+### 5. Email Notifications
+- Automatic email alerts for task updates.
+
+More details can be found in the Project documentation pdf
+---

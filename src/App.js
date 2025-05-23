@@ -1,12 +1,27 @@
 import React, { useEffect } from "react";
 import { useAuth } from "react-oidc-context";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate,  useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import RedirectToLogin from "./pages/RedirectToLogin";
+import IntegratedGroups from "./components/IntegratedGroups";
 
-function App() {
+  function CleanUrlAfterLogin() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.has("code") || params.has("state")) {
+      navigate("/", { replace: true });
+    }
+  }, [location]);
+
+  return null;
+}
+
+function AppContent() {
   const auth = useAuth();
 
   useEffect(() => {
@@ -16,7 +31,6 @@ function App() {
       window.location.replace("/");
     }
   }, []);
-
 
   if (auth.isLoading) {
     return (
@@ -36,20 +50,26 @@ function App() {
     const email = auth.user?.profile.email;
 
     return (
-      <Router>
+      <>
+        <CleanUrlAfterLogin />
         <Routes>
-          <Route path="/" element={<HomePage username={name} />} />
+          <Route path="/" element={<IntegratedGroups username={name} />} />
           <Route path="/profile" element={<ProfilePage name={name} email={email} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-      </Router>
+      </>
     );
   }
 
-  if (!auth.isAuthenticated) {
   return <RedirectToLogin />;
 }
 
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
 }
 
 export default App;
