@@ -11,7 +11,8 @@ function ProfilePage({ name, email }) {
 
   const signOutRedirect = () => {
     const clientId = "7kp7g3giro4pav3qo9keq36l2l";
-    const logoutUri = "http://https://13.60.229.122?post_logout=true";
+    // const logoutUri = "https://13.60.229.122?post_logout=true";
+    const logoutUri = "http://localhost:3000?post_logout=true";
     const cognitoDomain = "https://eu-north-1eh2sejlbm.auth.eu-north-1.amazoncognito.com";
 
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;

@@ -378,6 +378,65 @@ const IntegratedGroups = ({ username }) => {
       setError('Failed to create task group');
     }
   };
+  
+  const handleDeleteTaskGroup = async (group_id, user_group_id) => {
+    const confirmed = window.confirm("Are you sure you want to delete this task group?");
+    if (!confirmed) return;
+  
+    try {
+      const response = await fetch(
+        "https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/TaskGroupManager/delete-task-group",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ group_id}),
+        }
+      );
+  
+      const result = await response.json();
+      if (response.ok) {
+        alert("Task group deleted");
+        fetchTaskGroups(user_group_id); // Replace with your actual refresh function
+      } else {
+        alert("Failed to delete task group: " + result.message);
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Error deleting task group.");
+    }
+  };
+  
+const handleExitGroup = async (group_id) => {
+  try {
+    const user_id = auth.user?.profile?.sub ?? auth.user.sub;
+
+    const res = await fetch(
+      'https://avess5h6lg.execute-api.eu-north-1.amazonaws.com/UserGroupManagement/exit-user-group',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ group_id, user_id }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || 'Failed to exit group');
+
+    alert(data.message);
+
+    // Optional: refresh group list or remove exited group from UI
+    await fetchUserGroups();
+    setSelectedGroup(null);
+  } catch (err) {
+    console.error('Error exiting group:', err);
+    alert('Failed to exit group. Please try again.');
+  }
+};
 
   useEffect(() => {
     fetchUserGroups();
@@ -432,6 +491,8 @@ const IntegratedGroups = ({ username }) => {
                   >
                     <div className="group-card-header">
                       <h3>{group.group_name}</h3>
+                                                   <div className="task-group-actions">
+
                       <button 
                         className="create-task-group-btn"
                         onClick={(e) => {
@@ -443,6 +504,16 @@ const IntegratedGroups = ({ username }) => {
                         <img src={AddIcon} alt="Add Task Group" className="add-icon" />
                         New Task Group
                       </button>
+                      <button
+            className="exit-group-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleExitGroup(group.group_id);
+            }}
+          >
+            Exit Group
+          </button>
+          </div>
                     </div>
                     <p className="group-role">{group.role}</p>
                   </div>
@@ -453,18 +524,35 @@ const IntegratedGroups = ({ username }) => {
                         <div key={taskGroup.group_id} className="task-group-container">
                           <div className="task-group-header">
                             <h4>{taskGroup.name}</h4>
-                            <button 
-                              className="create-task-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedTaskGroupForTask(taskGroup);
-                                setSelectedGroupForTaskGroup(group);
-                                setShowCreateTaskModal(true);
-                                }}
-                                >
-                                  <img src={AddIcon} alt="Add Task" className="add-icon" />
-                                  New Task
-                                </button>
+                             <div className="task-group-actions">
+
+
+  <button
+    className="create-task-btn"
+    onClick={(e) => {
+      e.stopPropagation();
+      setSelectedTaskGroupForTask(taskGroup);
+      setSelectedGroupForTaskGroup(group);
+      setShowCreateTaskModal(true);
+    }}
+  >
+    <img src={AddIcon} alt="Add Task" className="add-icon" />
+    New Task
+  </button>
+
+    <button
+    className="delete-task-group-btn"
+    onClick={(e) => {
+      e.stopPropagation();
+      handleDeleteTaskGroup(taskGroup.group_id, selectedGroup.group_id);
+    }}
+  >
+    Delete Task Group
+  </button>
+
+    
+</div>
+
                                 </div>
                                 <div className="tasks-list">
 
