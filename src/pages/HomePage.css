@@ -372,11 +372,12 @@ body, html {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  
 }
 
 .details-btn img, .delete-btn img {

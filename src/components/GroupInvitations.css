@@ -115,7 +115,7 @@
 .accept-btn {
   background-color: #4CAF50;
   color: white;
-  width: 90%;
+  
 }
 
 .accept-btn:hover {
@@ -311,6 +311,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+    padding: 1.5rem;
   }
   
   .invitation-actions {

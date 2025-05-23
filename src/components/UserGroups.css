@@ -435,3 +435,92 @@
     min-height: 100px;
     resize: vertical;
   } 
+
+  .task-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 1.5fr 1.2fr 2fr 2fr; /* Increased Priority and Deadline */
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  word-wrap: break-word;
+}
+
+
+.task-header {
+  background-color: #f7f7f7;
+  font-weight: bold;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.task-row {
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 0.5rem;
+}
+.status-select {
+  width: auto;        /* Allow it to shrink */
+  min-width: 100px;   /* Or whatever width you prefer */
+  max-width: 150px;   /* Prevent it from growing too wide */
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+
+.task-title,
+.description-cell,
+.priority-cell,
+.deadline-cell,
+.attachment-cell,
+.status-actions {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.status-dropdown {
+  width: auto; 
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.priority-dropdown,
+.deadline-picker {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+
+.Low {
+  background-color: #e0f7fa;
+  color: #00796b;
+}
+
+.priority-medium {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.priority-high {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.priority-low option,
+.priority-medium option,
+.priority-high option {
+  font-weight: bold;
+}

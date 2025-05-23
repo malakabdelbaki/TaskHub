@@ -184,17 +184,19 @@ const GroupInvitations = ({ userId, onInvitationHandled, groups, fetchUserGroups
             <div key={invitation.invitation_id} className="invitation-card">
               <div className="invitation-info">
                 <h3>{invitation.group_name}</h3>
-                <p>Invited by: {invitation.invited_by_name}</p>
+                <p>Invited by: {invitation.invited_by}</p>
               </div>
               <div className="invitation-actions">
                 <button
-                  className="accept-btn"
+                  style={{ fontSize: '0.85rem', padding: '2px 10px', minWidth: '60px', height: '28px' }}
+                  className="accept-btn small-btn"
                   onClick={() => handleInvitation(invitation.invitation_id, true)}
                 >
                   Accept
                 </button>
                 <button
-                  className="decline-btn"
+                  style={{ fontSize: '0.85rem', padding: '2px 10px', minWidth: '60px', height: '28px' }}
+                  className="decline-btn small-btn"
                   onClick={() => handleInvitation(invitation.invitation_id, false)}
                 >
                   Decline
