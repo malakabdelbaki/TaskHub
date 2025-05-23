@@ -8,6 +8,7 @@ const cognitoAuthConfig = {
   client_id: "7kp7g3giro4pav3qo9keq36l2l",
   redirect_uri: "http://localhost:3000",
   response_type: "code",
+  loadUserInfo: true,
   scope: "email openid phone profile",
 };
 
